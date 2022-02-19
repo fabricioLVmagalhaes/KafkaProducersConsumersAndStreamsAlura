@@ -6,7 +6,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
 public class CreateUserService {
 
@@ -15,9 +14,14 @@ public class CreateUserService {
     CreateUserService() throws SQLException {
         String url = "jdbc:sqlite:service-user/target/users_database.db";
         this.connection = DriverManager.getConnection(url);
-        connection.createStatement().execute("create table Users (" +
-                "uuid varchar(200) primary key," +
-                "email varchar(200))");
+        try {
+            connection.createStatement().execute("create table Users (" +
+                    "uuid varchar(200) primary key," +
+                    "email varchar(200))");
+        } catch (SQLException ex) {
+            // could be wrong sql exception, as it is not the focus will ignore
+            ex.printStackTrace();
+        }
     }
 
     public static void main(String[] args) throws SQLException {
@@ -36,19 +40,19 @@ public class CreateUserService {
         System.out.println(record.value());
         var order = record.value();
 
-        if(isNewUser(order.getEmail())) {
-            insertNewUser(order.getEmail());
+        if (isNewUser(order.getEmail())) {
+            insertNewUser(order.getUserId(), order.getEmail());
         }
 
     }
 
-    private void insertNewUser(String email) throws SQLException {
+    private void insertNewUser(String uuid, String email) throws SQLException {
         var insert = connection.prepareStatement("insert into Users (uuid, email) " +
                 "values (?,?)");
-        insert.setString(1, "uuid");
+        insert.setString(1, uuid);
         insert.setString(2, email);
         insert.execute();
-        System.out.println("Usuario uuid e " + email + "adicionado");
+        System.out.println("Usuario " + uuid + "e " + email + " adicionado");
     }
 
     private boolean isNewUser(String email) throws SQLException {

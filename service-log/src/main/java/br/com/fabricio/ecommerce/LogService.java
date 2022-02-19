@@ -24,6 +24,7 @@ public class LogService {
         System.out.println(record.value());
         System.out.println(record.partition());
         System.out.println(record.offset());
+
     }
 
 }
